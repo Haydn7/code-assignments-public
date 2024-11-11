@@ -159,20 +159,44 @@ class SimpleNeuralNetwork:
         """
 
         # Output layer gradient ()
-        # Assuming mean squared error loss
-        dZ3 = self.output - Y  # (batch_size, output_size)
-
-        ########### YOUR CODE HERE ############
-
-        pass
+        self.calc_gradients(Y)
 
         # Update weights and biases
-        self.W3 -= 0
-        self.b3 -= 0
-        self.W2 -= 0
-        self.b2 -= 0
-        self.W1 -= 0
-        self.b1 -= 0
+        self.W3 -= learning_rate * self.dW3
+        self.W2 -= learning_rate * self.dW2
+        self.W1 -= learning_rate * self.dW1
+        self.b3 -= learning_rate * self.db3
+        self.b2 -= learning_rate * self.db2
+        self.b1 -= learning_rate * self.db1
 
-        ########### END YOUR CODE  ############
+        return self.dX, self.dZ1, self.dZ2, self.dZ3
 
+
+    def calc_gradients(self, Y: torch.Tensor) -> None:
+        """
+        Calculates the gradients.
+        Separated out of backward to enable unit testing of gradients (as backward update the parameters)
+
+        Args:
+            Y: Target output (batch_size, output_size)
+
+        Returns:
+            None
+        """
+
+        # Assuming mean squared error loss
+        self.dZ3 = self.output - Y  # (batch_size, output_size)
+
+        # Just rearrange the einsum to back propagate the gradients
+        #  dY has shape (batches, hidden), W shape (hidden, features), X shape (batches, features)
+        self.dZ2 = einops.einsum(self.W3, self.dZ3, "hidden features, batches hidden -> batches features")
+        self.dZ1 = einops.einsum(self.W2, self.dZ2, "hidden features, batches hidden -> batches features")
+        self.dX =  einops.einsum(self.W1, self.dZ1, "hidden features, batches hidden -> batches features")
+
+        self.db3 = einops.einsum(self.dZ3, "batches hidden -> hidden")
+        self.db2 = einops.einsum(self.dZ2, "batches hidden -> hidden")
+        self.db1 = einops.einsum(self.dZ1, "batches hidden -> hidden")
+
+        self.dW3 = einops.einsum(self.Z2, self.dZ3, "batches features, batches hidden -> hidden features")
+        self.dW2 = einops.einsum(self.Z1, self.dZ2, "batches features, batches hidden -> hidden features")
+        self.dW1 =  einops.einsum(self.X, self.dZ1, "batches features, batches hidden -> hidden features")

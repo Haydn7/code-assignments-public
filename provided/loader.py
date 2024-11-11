@@ -66,8 +66,8 @@ class MultiProcessDataset(SingleProcessDataset):
 
         # Calculate the row ranges using row_count and number of CPU processors
         num_threads = multiprocessing.cpu_count()
-        block_row_count = div_up(row_count, num_threads - 1)
-        rows = [min(block_row_count * i, row_count) for i in range(num_threads)]
+        block_row_count = div_up(row_count, num_threads)
+        rows = [min(block_row_count * i, row_count) for i in range(num_threads + 1)]
 
         # Launch the thread workers with the lock
         lock = Lock()
@@ -76,7 +76,7 @@ class MultiProcessDataset(SingleProcessDataset):
             td.start()
             return td
 
-        threads = [start_thread(s, e) for s,e in zip([0] + rows[:-1], rows)]
+        threads = [start_thread(s, e) for s,e in zip( rows[:-1], rows[1:])]
         for t in threads: t.join()
 
         # Calculate total load time

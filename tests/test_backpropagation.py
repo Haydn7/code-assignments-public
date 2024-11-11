@@ -1,64 +1,54 @@
 import unittest
 import torch
+from torch import Tensor
 from typing import Final
 from provided.network import SimpleNeuralNetwork
 from numpy.ma.testutils import assert_equal
 
 
-class NetworkModelSingleton:
-    _instance = None
+def create_network_and_calc_gradients() -> tuple[SimpleNeuralNetwork, dict[str, Tensor]]:
+    # Construct the neural network and random sample data
+    input_dim: Final[int] = 16
+    hidden_sizes: Final[list[int]] = [64, 32]  # example hidden layer sizes
+    output_size: Final[int] = 1
+    batch_size: Final[int] = 8
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(NetworkModelSingleton, cls).__new__(cls)
-            cls._instance.data = cls._load_data()
-        return cls._instance
+    network = SimpleNeuralNetwork(input_dim, hidden_sizes, output_size)
+    X = torch.randn(batch_size, input_dim, requires_grad=True)
+    Y_target = torch.randn(batch_size, output_size, requires_grad=True)
 
-    @staticmethod
-    def _load_data():
-        # Construct the neural network and random sample data
-        input_dim: Final[int] = 16
-        hidden_sizes: Final[list[int]] = [64, 32]  # example hidden layer sizes
-        output_size: Final[int] = 1
-        batch_size: Final[int] = 8
+    # Back propagate using the custom method and auto grad
+    params_requiring_gradients = "b1 b2 b3 W1 W2 W3".split()
+    for p in params_requiring_gradients:
+        param = getattr(network, p).detach()
+        param.requires_grad_(True)
+        if param.grad is not None:
+            param.grad.zero_()
+        setattr(network, p, param)
 
-        network = SimpleNeuralNetwork(input_dim, hidden_sizes, output_size)
-        X = torch.randn(batch_size, input_dim, requires_grad=True)
-        Y_target = torch.randn(batch_size, output_size, requires_grad=True)
+    Y = network.forward(X)
+    loss = 0.5 * torch.sum((Y_target - Y) ** 2)
+    loss.backward()
 
-        # Back propagate using the custom method and auto grad
-        params_requiring_gradients = "b1 b2 b3 W1 W2 W3".split()
-        for p in params_requiring_gradients:
-            param = getattr(network, p).detach()
-            param.requires_grad_(True)
-            if param.grad is not None:
-                param.grad.zero_()
-            setattr(network, p, param)
-
-        Y = network.forward(X)
-        loss = 0.5 * torch.sum((Y_target - Y) ** 2)
-        loss.backward()
-
-        gradients = { p: getattr(network, p).grad for p in params_requiring_gradients }
-        gradients["X"] = X.grad
-        network.calc_gradients(Y_target)
-        return network, gradients
-
-network_instance = NetworkModelSingleton()
+    gradients = { p: getattr(network, p).grad for p in params_requiring_gradients }
+    gradients["X"] = X.grad
+    network.calc_gradients(Y_target)
+    return network, gradients
 
 
 class TestBackPropagation(unittest.TestCase):
-    """"Tests the back propagation values calculated manually against those using torch autograd."""
+    """Tests the back propagation values calculated manually against those using torch autograd."""
 
-    def setUp(self):
-        self.network, self.gradients = network_instance.data
-        self.TOL: Final[float] = 1.e-6
+    @classmethod
+    def setUpClass(cls):
+        cls.network, cls.gradients = create_network_and_calc_gradients()
 
     def _test_close_gradients(self, name):
+        TOL: Final[float] = 1.e-6
         actual = getattr(self.network, f"d{name}").detach()
         target = self.gradients[name]
         assert_equal(actual.shape, target.shape, f"{name} shape")
-        self.assertTrue(torch.allclose(actual, target, atol=self.TOL), f"{name} gradients")
+        self.assertTrue(torch.allclose(actual, target, atol=TOL), f"{name} gradients")
 
     def test_X_gradients(self): self._test_close_gradients("X")
     def test_b1_gradients(self): self._test_close_gradients("b1")

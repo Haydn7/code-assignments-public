@@ -9,8 +9,9 @@ from pandas.testing import assert_frame_equal
 class TestMultiProcessDataset(unittest.TestCase):
     """Tests the values and shapes of the single and multi processor data loaders"""
 
-    def setUp(self):
-        self.single_loader, self.multi_loader = load_data_loaders()
+    @classmethod
+    def setUpClass(cls):
+        cls.single_loader, cls.multi_loader = load_data_loaders()
 
     def test_features_shape(self):
         assert_equal(self.multi_loader.features.shape, self.single_loader.features.shape, "Features shape")

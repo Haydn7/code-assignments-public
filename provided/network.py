@@ -44,6 +44,14 @@ class SimpleNeuralNetwork:
         self.Z3: torch.tensor = None
         self.output: torch.tensor = None
 
+        # These will be set during the backward pass
+        self.dX: torch.tensor = None
+        self.dZ1: torch.tensor = None
+        self.dZ2: torch.tensor = None
+        self.dZ3: torch.tensor = None
+        self.doutput: torch.tensor = None
+
+
     def forward(self, X) -> np.ndarray:
         """
         Perform a forward pass through the network.

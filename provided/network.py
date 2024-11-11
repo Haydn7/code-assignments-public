@@ -193,9 +193,9 @@ class SimpleNeuralNetwork:
         self.dZ1 = einops.einsum(self.W2, self.dZ2, "hidden features, batches hidden -> batches features")
         self.dX =  einops.einsum(self.W1, self.dZ1, "hidden features, batches hidden -> batches features")
 
-        self.db3 = einops.einsum(self.dZ3, "batches hidden -> hidden")
-        self.db2 = einops.einsum(self.dZ2, "batches hidden -> hidden")
-        self.db1 = einops.einsum(self.dZ1, "batches hidden -> hidden")
+        self.db3 = einops.einsum(self.dZ3, "batches hidden -> hidden").unsqueeze(0) # Match shape of bias [1, channels]
+        self.db2 = einops.einsum(self.dZ2, "batches hidden -> hidden").unsqueeze(0)
+        self.db1 = einops.einsum(self.dZ1, "batches hidden -> hidden").unsqueeze(0)
 
         self.dW3 = einops.einsum(self.Z2, self.dZ3, "batches features, batches hidden -> hidden features")
         self.dW2 = einops.einsum(self.Z1, self.dZ2, "batches features, batches hidden -> hidden features")

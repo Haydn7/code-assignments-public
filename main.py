@@ -12,7 +12,6 @@ from typing import Final
 if __name__ == "__main__":
 
     print("Running main.py...")
-    exit(0)
 
     ###########################################################################
     # Load data

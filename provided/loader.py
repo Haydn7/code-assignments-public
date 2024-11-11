@@ -1,14 +1,11 @@
 import time
 import torch
-from sympy.codegen.ast import float32
 from torch.utils.data import Dataset
 import pandas as pd
 from typing import Final
 import numpy as np
 from threading import Thread, Lock
 import multiprocessing
-
-
 
 
 class SingleProcessDataset(Dataset):
@@ -31,11 +28,14 @@ class SingleProcessDataset(Dataset):
         return self.features[idx], self.labels[idx]
 
 
+def div_up(x: int, divisor: int) -> int:
+    return (x + divisor - 1) // divisor
+
+
 class MultiProcessDataset(SingleProcessDataset):
     def __init__(self, csv_file):
         print("Loading data using multi process...")
         start_time = time.time()
-
 
         # Create empty dataframes arrays with the correct size
         FEATURE_COLUMNS: Final[list[str]] = "x1 x2 x3".split()
@@ -65,9 +65,6 @@ class MultiProcessDataset(SingleProcessDataset):
                 self.data.iloc[start_row:end_row] = block.values
 
         # Calculate the row ranges using row_count and number of CPU processors
-        def div_up(x: int, divisor: int) -> int:
-            return (x + divisor - 1) // divisor
-
         num_threads = multiprocessing.cpu_count()
         block_row_count = div_up(row_count, num_threads - 1)
         rows = [min(block_row_count * i, row_count) for i in range(num_threads)]
@@ -85,6 +82,7 @@ class MultiProcessDataset(SingleProcessDataset):
         # Calculate total load time
         self.load_time = time.time() - start_time
         print(f"Dataset loading completed in {self.load_time:.2f} seconds")
+
 
 def load_data_loaders():
     """ Used for unit testing of data loaders"""

@@ -40,10 +40,12 @@ class NetworkModelSingleton:
         loss.backward()
 
         gradients = { p: getattr(network, p).grad for p in params_requiring_gradients }
+        gradients["X"] = X.grad
         network.calc_gradients(Y_target)
         return network, gradients
 
 network_instance = NetworkModelSingleton()
+
 
 class TestBackPropagation(unittest.TestCase):
     """"Tests the back propagation values calculated manually against those using torch autograd."""
@@ -58,7 +60,7 @@ class TestBackPropagation(unittest.TestCase):
         assert_equal(actual.shape, target.shape, f"{name} shape")
         self.assertTrue(torch.allclose(actual, target, atol=self.TOL), f"{name} gradients")
 
-    #def test_X_gradients(self): self._test_close_gradients("X")
+    def test_X_gradients(self): self._test_close_gradients("X")
     def test_b1_gradients(self): self._test_close_gradients("b1")
     def test_b2_gradients(self): self._test_close_gradients("b2")
     def test_b3_gradients(self): self._test_close_gradients("b3")

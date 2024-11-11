@@ -3,10 +3,7 @@ from torch.utils.data import DataLoader, random_split
 from provided.network import SimpleNeuralNetwork
 from provided.loader import MultiProcessDataset, SingleProcessDataset
 from provided.bounds import IntervalBoundPropagation
-
 from provided.constants import DATA_DIR
-
-from typing import Final
 
 
 if __name__ == "__main__":
@@ -37,13 +34,12 @@ if __name__ == "__main__":
     ###########################################################################
 
     network = SimpleNeuralNetwork(
-        batch_size=32,
         input_dim=3,
         hidden_sizes=[4, 4],
         output_size=1
     )
 
-    network.train(train_dataloader, epochs=2, batch_size=32, learning_rate=0.01)
+    network.train(train_dataloader, epochs=2, batch_size=32, learning_rate=0.0001)
 
     ###########################################################################
     # Evaluate the network

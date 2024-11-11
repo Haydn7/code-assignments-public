@@ -1,6 +1,8 @@
 import torch
+
 from provided.network import SimpleNeuralNetwork
 from torch import Tensor
+import einops
 
 class IntervalBoundPropagation:
 
@@ -54,26 +56,14 @@ class IntervalBoundPropagation:
             Given a network definition with input_dim=3 and an initial layer's weights:
 
             input_bounds.shape = (32, 3, 2)  # batch_size=32, input_dim=3
-            weights.shape = (3, 4)  # input_dim=3, output_dim=4
+            weights.shape = (3, 4)  # input_dim=3, output_dim=4, This is not correct as SimpleNeuralNetwork
+            have shape  (output_dim, input_dim) as created by torch.empty(hidden_sizes[0], input_dim)
+            s shape  weights.shape = (3, 4)  # input_dim=3, output_dim=4
             bias.shape = (4,)  # output_dim=4
             output = propagate_bounds(input_bounds, weights, bias)
             output.shape  # (32, 4, 2)
         """
-        batch_dim = input_bounds.shape[0]
-
-        out_shape = input_bounds.shape
-        out_shape[1] = weights.shape[1]
-
-        bounds_out = torch.empty(
-            (batch_dim, *out_shape, 2),
-            device="cpu",
-            dtype=torch.float64,
-        )
-
-        ########### YOUR CODE HERE ############
-
-        pass
-        
-        ########### END YOUR CODE  ############
-
-        return bounds_out
+        bias = torch.unsqueeze(bias, axis=-1)
+        # The SimpleNeualNetwork weights have shape (dim_out, dim_in) not as described in this method document string
+        out_bounds = bias + einops.einsum(weights, input_bounds, "dim_out dim_in, batch dim_in bound -> batch dim_out bound")
+        return out_bounds

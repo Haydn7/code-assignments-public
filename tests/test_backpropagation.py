@@ -18,12 +18,17 @@ class TestBackPropagation(unittest.TestCase):
         learning_rate: Final[float] = 1.e-4
 
         self.network = SimpleNeuralNetwork(input_dim, hidden_sizes, output_size)
-        X = torch.randn(batch_size, input_dim)
-        Y_target = torch.randn(batch_size, output_size)  # example target values for RMS loss
+        X = torch.randn(batch_size, input_dim, requires_grad=True)
+        Y_target = torch.randn(batch_size, output_size, requires_grad=True)
 
         # Back propagate first using the custom method then using auto grad
         Y = self.network.forward(X)
         self.network.backward(Y, learning_rate)
+
+        params_requiring_gradients = "b1 b2 b3 W1 W2 W3".split()
+        for p in params_requiring_gradients:
+            getattr(self.network, p).requires_grad_()
+
         loss = 0.5 * torch.sqrt(torch.mean((Y_target - Y) ** 2))
         loss.backward()
 

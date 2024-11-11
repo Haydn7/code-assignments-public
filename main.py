@@ -6,14 +6,10 @@ from provided.bounds import IntervalBoundPropagation
 
 from provided.constants import DATA_DIR
 
+from typing import Final
+
 
 if __name__ == "__main__":
-
-    dataset = SingleProcessDataset(DATA_DIR / '3d_data.csv')
-    print("features", dataset.features.dtype)
-    print("labels", dataset.features.dtype)
-
-    dataset = MultiProcessDataset(DATA_DIR / '3d_data.csv')
 
     print("Running main.py...")
     exit(0)

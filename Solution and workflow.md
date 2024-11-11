@@ -19,7 +19,7 @@
 * Backprop of linear layers straightforward using einops.
  
 ### Uses of AI
-* How to override torch.Tensors created having required gradients = False so that gradients can be calculated using autograd in the test script.
+* How to override torch. Tensors created having required gradients = False so that gradients can be calculated using autograd in the test script.
 
 ## Problem 3: Evaluating the Neural Network Output Bounds 
 ### Thought process
@@ -32,3 +32,15 @@
 
 ### Uses of AI
 * How to override torch.Tensors created with having required gradients
+
+
+## Test scripts
+Test scripts can be run individually using the commands:
+```bash
+poetry run python ./tests/test_backpropagation.py 
+poetry run python ./tests/test_data_loader.py 
+```
+To run all test scripts run command:
+```bash
+poetry run python -m unittest discover -s tests
+```

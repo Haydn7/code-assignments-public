@@ -2,6 +2,7 @@ import time
 import torch
 from torch.utils.data import Dataset
 import pandas as pd
+from typing import Final
 
 
 class SingleProcessDataset(Dataset):
@@ -38,3 +39,8 @@ class MultiProcessDataset(SingleProcessDataset):
         # Calculate total load time
         self.load_time = time.time() - start_time
         print(f"Dataset loading completed in {self.load_time:.2f} seconds")
+
+def load_data_loaders():
+    """ Used for unit testing of data loaders"""
+    CSV_PATH: Final[str] = "provided/3d_data.csv"
+    return SingleProcessDataset(CSV_PATH), MultiProcessDataset(CSV_PATH)

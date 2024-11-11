@@ -5,8 +5,9 @@ from numpy.ma.testutils import assert_equal
 from provided.loader import load_data_loaders
 from pandas.testing import assert_frame_equal
 
-# Test case
+
 class TestMultiProcessDataset(unittest.TestCase):
+    """"Tests the values and shapes of the single and multi processor data loaders"""
 
     def setUp(self):
         self.single_loader, self.multi_loader = load_data_loaders()
@@ -26,6 +27,5 @@ class TestMultiProcessDataset(unittest.TestCase):
     def test_dataframes_equal(self):
         assert_frame_equal(self.single_loader.data, self.multi_loader.data)
 
-# Run tests
 if __name__ == '__main__':
     unittest.main()

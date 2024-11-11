@@ -1,13 +1,20 @@
 import  torch
 from torch.utils.data import DataLoader, random_split
 from provided.network import SimpleNeuralNetwork
-from provided.loader import MultiProcessDataset
+from provided.loader import MultiProcessDataset, SingleProcessDataset
 from provided.bounds import IntervalBoundPropagation
 
 from provided.constants import DATA_DIR
 
 
 if __name__ == "__main__":
+
+    dataset = SingleProcessDataset(DATA_DIR / '3d_data.csv')
+    print("features", dataset.features.dtype)
+    print("labels", dataset.features.dtype)
+
+
+    dataset = MultiProcessDataset(DATA_DIR / '3d_data.csv')
 
     print("Running main.py...")
     exit(0)

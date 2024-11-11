@@ -27,5 +27,6 @@ class TestMultiProcessDataset(unittest.TestCase):
     def test_dataframes_equal(self):
         assert_frame_equal(self.single_loader.data, self.multi_loader.data)
 
+
 if __name__ == '__main__':
     unittest.main()

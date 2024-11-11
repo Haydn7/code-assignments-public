@@ -13,7 +13,6 @@ if __name__ == "__main__":
     print("features", dataset.features.dtype)
     print("labels", dataset.features.dtype)
 
-
     dataset = MultiProcessDataset(DATA_DIR / '3d_data.csv')
 
     print("Running main.py...")

@@ -36,18 +36,18 @@ class MultiProcessDataset(SingleProcessDataset):
         print("Loading data using multi process...")
         start_time = time.time()
 
-        feature_columns = "x1 x2 x3".split()
 
         # Create empty dataframes arrays with the correct size
+        FEATURE_COLUMNS: Final[list[str]] = "x1 x2 x3".split()
         headers = pd.read_csv(csv_file, nrows=0).columns.tolist()
-        column_types = { i: float if c in feature_columns else int for i, c in enumerate(headers)}
+        column_types = { i: float if c in FEATURE_COLUMNS else int for i, c in enumerate(headers)}
         with open(csv_file, 'r') as f:
             row_count = sum(1 for _ in f) - 1
         self.data = pd.DataFrame(index=range(row_count), columns=headers)
-        for c in feature_columns:
+        for c in FEATURE_COLUMNS:
             self.data[c] = pd.Series(np.nan, index=self.data.index, dtype=float)
         self.data["label"] = pd.Series(0, index=self.data.index, dtype=int)
-        self.features = torch.zeros((row_count, len(feature_columns)))
+        self.features = torch.zeros((row_count, len(FEATURE_COLUMNS)))
         self.labels = torch.zeros((row_count,))
 
         def load_data_block(lock: Lock, start_row: int, end_row: int) -> None:
@@ -55,7 +55,7 @@ class MultiProcessDataset(SingleProcessDataset):
             block = pd.read_csv(csv_file, skiprows=range(start_row + 1), nrows=n_rows, header=None,
                                 names=headers, dtype=column_types)
 
-            features_block = torch.FloatTensor(block[feature_columns].values)
+            features_block = torch.FloatTensor(block[FEATURE_COLUMNS].values)
             labels_block = torch.LongTensor(block["label"].values.flatten())
 
             with lock:

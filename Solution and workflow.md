@@ -19,7 +19,7 @@
 * Backprop of linear layers straightforward using einops.
  
 ### Uses of AI
-* How to override torch. Tensors created having required gradients = False so that gradients can be calculated using autograd in the test script.
+* How to override Tensors created with required gradients set to False so that gradients can be calculated using autograd in the test script.
 
 ## Problem 3: Evaluating the Neural Network Output Bounds 
 ### Thought process
@@ -28,10 +28,6 @@
 * Think I am missing something from the description as the solution seems simple, will check with AI.
 * To save time, I will not write a unit test script for this.
 * The description of IntervalBoundsPropagation.propagate_bounds weight shape is not consistent with the weights of the SimpleNeuralNetwork weights, which are created using torch.empty(hidden_sizes[0], input_dim)
-
-
-### Uses of AI
-* How to override torch.Tensors created with having required gradients
 
 
 ## Test scripts
